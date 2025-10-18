@@ -1,69 +1,107 @@
 // corehealth-backend/models/authModel.js
+"use strict";
+
 const { query } = require("./common");
 
 /**
- * Busca un usuario por email o usuario en la tabla indicada (pacientes | medicos)
+ * Busca un usuario por email o usuario en una tabla whitelisteada
+ * @param {'admins'|'medicos'|'pacientes'} table
+ * @param {string} emailOrUsuario
+ * @returns {Promise<object|null>}
  */
-async function findUserByEmailOrUsuario(roleTable, emailOrUsuario) {
-  const sql = `SELECT id, email, usuario, password_hash
-               FROM ${roleTable}
-               WHERE email = ? OR usuario = ?
-               LIMIT 1`;
-  const rows = await query(sql, [emailOrUsuario, emailOrUsuario]);
-  return rows[0];
+async function findUserByEmailOrUsuario(table, emailOrUsuario) {
+  const allowed = new Set(["admins", "medicos", "pacientes"]);
+  if (!allowed.has(table)) {
+    throw new Error(`Tabla no permitida: ${table}`);
+  }
+  const t = table; // nombre seguro por whitelist
+  const q = String(emailOrUsuario || "").trim();
+
+  // Seleccionamos campos comunes. Si tu tabla tiene otros campos, no pasa nada.
+  const rows = await query(
+    `SELECT id, email, usuario, password_hash, activo
+       FROM ${t}
+      WHERE email = ? OR usuario = ?
+      LIMIT 1`,
+    [q, q]
+  );
+  return rows[0] || null;
 }
 
 /**
- * Crea paciente (según tu esquema actual de 'pacientes')
- * Columnas: id, usuario, email, password_hash, nombre, apellido, telefono, direccion, fecha_nacimiento, dpi, activo, creado_en
+ * Crea un PACIENTE
+ * dto: {
+ *  nombre, apellido, email, usuario, password_hash,
+ *  telefono?, direccion?, fecha_nacimiento?, dpi?
+ * }
+ * @returns {Promise<{id:number}>}
  */
-async function createPaciente(data) {
-  const sql = `INSERT INTO pacientes
-    (usuario, email, password_hash, nombre, apellido, telefono, direccion, fecha_nacimiento, dpi)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
+async function createPaciente(dto) {
+  const sql = `
+    INSERT INTO pacientes
+      (nombre, apellido, email, usuario, password_hash, telefono, direccion, fecha_nacimiento, dpi, activo)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+  `;
   const params = [
-    data.usuario,
-    data.email,
-    data.password_hash,
-    data.nombre,
-    data.apellido,
-    data.telefono || null,
-    data.direccion || null,
-    data.fecha_nacimiento || null, // 'YYYY-MM-DD' o null
-    data.dpi || null,
+    dto.nombre,
+    dto.apellido,
+    dto.email,
+    dto.usuario,
+    dto.password_hash,
+    dto.telefono ?? null,
+    dto.direccion ?? null,
+    dto.fecha_nacimiento ?? null,
+    dto.dpi ?? null,
   ];
-
-  const result = await query(sql, params);
-  return { id: result.insertId, ...data };
+  const r = await query(sql, params);
+  return { id: r.insertId };
 }
 
 /**
- * Crea médico (según tu esquema actual de 'medicos')
- * Columnas: id, usuario, email, password_hash, nombre, colegiado, telefono, especialidad_id, activo, creado_en
- * Nota: 'colegiado' es único por el índice uq_medicos_colegiado
+ * Crea un MÉDICO
+ * dto: {
+ *  nombre, email, usuario, password_hash,
+ *  colegiado, especialidad_id, telefono?
+ * }
+ * @returns {Promise<{id:number}>}
  */
-async function createMedico(data) {
-  const sql = `INSERT INTO medicos
-    (usuario, email, password_hash, nombre, colegiado, telefono, especialidad_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?)`;
-
+async function createMedico(dto) {
+  const sql = `
+    INSERT INTO medicos
+      (nombre, email, usuario, password_hash, colegiado, especialidad_id, telefono, activo)
+    VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+  `;
   const params = [
-    data.usuario,
-    data.email,
-    data.password_hash,
-    data.nombre,
-    data.colegiado, // requerido (único)
-    data.telefono || null,
-    data.especialidad_id, // requerido (FK a especialidades)
+    dto.nombre,
+    dto.email,
+    dto.usuario,
+    dto.password_hash,
+    dto.colegiado,
+    dto.especialidad_id,
+    dto.telefono ?? null,
   ];
+  const r = await query(sql, params);
+  return { id: r.insertId };
+}
 
-  const result = await query(sql, params);
-  return { id: result.insertId, ...data };
+/**
+ * (Opcional) Crea un ADMIN — útil para siembras programáticas
+ * dto: { nombre, email, usuario, password_hash }
+ */
+async function createAdmin(dto) {
+  const sql = `
+    INSERT INTO admins
+      (nombre, email, usuario, password_hash, activo)
+    VALUES (?, ?, ?, ?, 1)
+  `;
+  const params = [dto.nombre, dto.email, dto.usuario, dto.password_hash];
+  const r = await query(sql, params);
+  return { id: r.insertId };
 }
 
 module.exports = {
   findUserByEmailOrUsuario,
   createPaciente,
   createMedico,
+  createAdmin, // opcional
 };

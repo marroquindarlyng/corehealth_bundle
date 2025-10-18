@@ -1,0 +1,167 @@
+/* ===== Reset básico ===== */
+:root {
+  --radius-8: 8px;
+  --btn-radius: 8px;
+  --icon-size: 1.6rem;
+  --shadow-1: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --trans-200: 0.2s ease-in-out;
+  --font: "Poppins", sans-serif; /* <-- cambia si tu nuevo proyecto usa otra fuente */
+}
+
+/* ===== Tema Paciente (claro) ===== */
+body.theme-paciente {
+  /* <-- si en el nuevo proyecto el rol no es "paciente", cambia el nombre de la clase */
+  --bg: radial-gradient(circle, #ffffff 0%, #e9ecef 100%);
+  --fg: #0d6efd;
+  --text: #0d6efd;
+  --panel-bg: #ffffff;
+  --panel-text: #0d6efd;
+
+  --btn-solid-bg: #0d6efd;
+  --btn-solid-hover: #0b5ed7;
+  --btn-solid-text: #ffffff;
+
+  --btn-outline-border: #0d6efd;
+  --btn-outline-text: #0d6efd;
+  --btn-outline-hover: rgba(13, 110, 253, 0.1);
+
+  --icon-hover-bg: rgba(13, 110, 253, 0.1);
+
+  /* Back normal: icono azul, fondo blanco */
+  --back-fg: #0d6efd;
+  --back-bg: #ffffff;
+  --back-hover-bg: rgba(13, 110, 253, 0.1);
+}
+
+/* ===== Tema Doctor (oscuro) ===== */
+body.theme-doctor {
+  /* <-- si en el nuevo proyecto el rol no es "doctor", cambia el nombre de la clase */
+  --bg: radial-gradient(circle, #084298 0%, #0d6efd 100%);
+  --fg: #ffffff;
+  --text: #ffffff;
+  --panel-bg: #ffffff;
+  --panel-text: #084298;
+
+  --btn-solid-bg: #ffffff;
+  --btn-solid-hover: #e6e6e6;
+  --btn-solid-text: #0d6efd;
+
+  --btn-outline-border: #ffffff;
+  --btn-outline-text: #ffffff;
+  --btn-outline-hover: rgba(255, 255, 255, 0.1);
+
+  --icon-hover-bg: rgba(255, 255, 255, 0.12);
+
+  /* Back invertido para doctor: icono blanco, fondo azul */
+  --back-fg: #ffffff;
+  --back-bg: #0d6efd;
+  --back-hover-bg: #0b5ed7;
+}
+
+/* ===== Base de página ===== */
+body {
+  background: var(--bg);
+  font-family: var(--font);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+}
+
+/* ===== Íconos navegación ===== */
+.nav-icon, /* <-- si tu nuevo proyecto no usa "nav-icon", cámbialo */
+.home-icon, /* <-- cámbialo si tu navbar usa otra clase */
+.help-icon {
+  /* <-- cámbialo si tu navbar usa otra clase */
+  position: absolute;
+  top: 16px;
+  font-size: var(--icon-size);
+  color: var(--fg);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-8);
+  transition: background-color var(--trans-200);
+}
+
+/* ===== Logo y encabezados ===== */
+.logo {
+  /* <-- si tu logo tiene otra clase/id, cámbialo */
+  width: 150px;
+  margin-bottom: 1rem;
+}
+h1,
+h4,
+p {
+  /* <-- puedes ajustar según jerarquía de tu nuevo proyecto */
+  font-family: var(--font);
+}
+
+/* ===== Botones ===== */
+.btn-custom {
+  /* <-- cámbialo si en tu nuevo proyecto usas otra clase para botones */
+  min-width: 160px;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--btn-radius);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-transform: uppercase;
+  background-color: var(--btn-solid-bg);
+  color: var(--btn-solid-text);
+  border: none;
+}
+
+/* ===== Tarjeta / panel ===== */
+.panel,
+.login-card {
+  /* <-- cámbialo si en tu nuevo proyecto la tarjeta se llama distinto */
+  width: 100%;
+  max-width: 420px;
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+/* ===== Inputs con icono ===== */
+.form-control {
+  /* <-- si usas Bootstrap, ya existe; si no, cámbialo */
+  padding-left: 2.5rem;
+  font-size: 1rem;
+}
+.input-icon {
+  /* <-- cámbialo si tu input usa otro wrapper */
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #0d6efd;
+  font-size: 1.1rem;
+}
+
+/* ===== Botón Back (centrado abajo) ===== */
+.back-icon {
+  /* <-- cámbialo si tu botón de regreso tiene otro nombre */
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--icon-size);
+  color: var(--back-fg);
+  background-color: var(--back-bg);
+  box-shadow: var(--shadow-1);
+}

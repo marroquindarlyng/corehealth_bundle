@@ -8,8 +8,8 @@ const express = require("express");
 const cors = require("cors");
 
 const app = express();
-app.use(cors());
 app.use(express.json());
+app.use(cors());
 
 // Routes
 app.use("/api", require("./routes/catalogos.routes"));
@@ -26,6 +26,10 @@ app.use("/api", require("./routes/medicos.routes"));
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
 const port = process.env.PORT || 3001;
+
+//app.listen(process.env.PORT || 3001, () => {
+//console.log("API on", process.env.PORT || 3001);
+
 app.listen(port, () =>
   console.log(`Core Health API escuchando en http://localhost:${port}`)
 );
