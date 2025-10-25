@@ -11,6 +11,16 @@ const EDITABLE_FIELDS = [
   "dpi",
 ];
 
+async function findAll() {
+  // Ajusta WHERE si quieres solo activos: WHERE activo = 1
+  return await query(
+    `SELECT id, usuario, email, nombre, apellido, telefono, direccion,
+            fecha_nacimiento, dpi, activo, creado_en
+       FROM pacientes
+      ORDER BY id DESC`
+  );
+}
+
 async function getById(id) {
   const rows = await query(
     `SELECT id, usuario, email, nombre, apellido, telefono, direccion,
@@ -21,6 +31,39 @@ async function getById(id) {
     [id]
   );
   return rows[0] || null;
+}
+
+async function insert(data) {
+  // Espera: usuario, email, nombre, apellido, telefono, direccion, fecha_nacimiento, dpi, password_hash
+  const {
+    usuario,
+    email,
+    nombre,
+    apellido,
+    telefono,
+    direccion,
+    fecha_nacimiento,
+    dpi,
+    password_hash,
+  } = data;
+
+  const result = await query(
+    `INSERT INTO pacientes (usuario, email, nombre, apellido, telefono, direccion, fecha_nacimiento, dpi, password_hash, activo, creado_en)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW())`,
+    [
+      usuario,
+      email,
+      nombre || null,
+      apellido || null,
+      telefono || null,
+      direccion || null,
+      fecha_nacimiento || null,
+      dpi || null,
+      password_hash || null,
+    ]
+  );
+
+  return result; // result.insertId disponible para el llamador
 }
 
 async function updateById(id, data) {
@@ -59,10 +102,18 @@ async function deactivate(id) {
   return await query(`UPDATE pacientes SET activo = 0 WHERE id = ?`, [id]);
 }
 
+async function deleteById(id) {
+  // Si prefieres soft delete usa deactivate en su lugar
+  return await query(`DELETE FROM pacientes WHERE id = ?`, [id]);
+}
+
 module.exports = {
+  findAll,
   getById,
+  insert,
   updateById,
   getPasswordHash,
   changePassword,
   deactivate,
+  deleteById,
 };

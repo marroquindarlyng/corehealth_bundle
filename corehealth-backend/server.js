@@ -11,25 +11,25 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Routes
-app.use("/api", require("./routes/catalogos.routes"));
+// Logger simple para ver requests en la consola (temporal)
+app.use((req, res, next) => {
+  console.log(new Date().toISOString(), req.method, req.url);
+  next();
+});
+
+// Routes (mantén coherencia en montajes en tu proyecto)
 app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/pacientes", require("./routes/pacientes.routes"));
 app.use("/api/citas", require("./routes/citas.routes"));
 app.use("/api/recetas", require("./routes/recetas.routes"));
-app.use("/api", require("./routes/catalogos.routes"));
 app.use("/api/kpis", require("./routes/kpis.routes"));
 app.use("/api/medicos", require("./routes/medicos.routes"));
-app.use("/api", require("./routes/medicos.routes"));
+app.use("/api/catalogos", require("./routes/catalogos.routes"));
 
 // Healthcheck
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
 const port = process.env.PORT || 3001;
-
-//app.listen(process.env.PORT || 3001, () => {
-//console.log("API on", process.env.PORT || 3001);
-
 app.listen(port, () =>
   console.log(`Core Health API escuchando en http://localhost:${port}`)
 );
