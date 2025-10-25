@@ -10,6 +10,7 @@ const config = {
   // Acepta DB_PASS o DB_PASSWORD
   password: process.env.DB_PASS || process.env.DB_PASSWORD || "",
   database: process.env.DB_NAME || "corehealth",
+  port: Number(process.env.DB_PORT) || 3306,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,

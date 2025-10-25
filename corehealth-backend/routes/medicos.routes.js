@@ -2,17 +2,29 @@ const router = require("express").Router();
 const { auth, authorize } = require("../middleware/auth"); // tu carpeta es "middleware"
 const { query } = require("../models/common");
 
-// Agenda del médico autenticado
-router.get(
-  "/medicos/me/citas",
-  auth(),
-  authorize("medico"),
-  async (req, res) => {
-    try {
-      const medicoId = req.user.id;
+// Lista de médicos básicos (para selects de agenda)
+router.get("/", async (_req, res) => {
+  try {
+    const rows = await query(
+      `SELECT id, nombre, apellido, especialidad_id
+         FROM medicos
+        WHERE activo = 1
+        ORDER BY nombre, apellido`
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error("[GET /medicos] Error:", err);
+    res.status(500).json({ error: "No se pudieron listar los médicos" });
+  }
+});
 
-      const rows = await query(
-        `
+// Agenda del médico autenticado
+router.get("/me/citas", auth(), authorize("medico"), async (req, res) => {
+  try {
+    const medicoId = req.user.id;
+
+    const rows = await query(
+      `
       SELECT
         c.id,
         DATE_FORMAT(c.fecha, '%Y-%m-%d') AS fecha,
@@ -26,18 +38,17 @@ router.get(
       WHERE c.medico_id = ?
       ORDER BY c.fecha DESC, c.hora DESC
       `,
-        [medicoId]
-      );
+      [medicoId]
+    );
 
-      // Normaliza a 0/1 explícito
-      rows.forEach((r) => (r.tiene_receta = Number(r.tiene_receta) ? 1 : 0));
+    // Normaliza a 0/1 explícito
+    rows.forEach((r) => (r.tiene_receta = Number(r.tiene_receta) ? 1 : 0));
 
-      res.json(rows || []);
-    } catch (err) {
-      console.error("[GET /medicos/me/citas] Error:", err);
-      res.status(500).json({ error: "No se pudieron cargar las citas" });
-    }
+    res.json(rows || []);
+  } catch (err) {
+    console.error("[GET /medicos/me/citas] Error:", err);
+    res.status(500).json({ error: "No se pudieron cargar las citas" });
   }
-);
+});
 
 module.exports = router;
