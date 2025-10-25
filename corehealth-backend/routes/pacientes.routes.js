@@ -5,8 +5,7 @@ const { auth, authorize } = require("../middleware/auth");
 const Pacientes = require("../models/pacientesModel");
 
 /**
- * GET /api/pacientes/me
- * Perfil del paciente autenticado
+ * Rutas de perfil (mantener /me antes de /:id para evitar conflictos)
  */
 router.get("/me", auth(), authorize("paciente"), async (req, res) => {
   try {
@@ -23,11 +22,6 @@ router.get("/me", auth(), authorize("paciente"), async (req, res) => {
   }
 });
 
-/**
- * PUT /api/pacientes/me
- * Actualiza datos básicos del perfil (sin email/usuario/password)
- * Body: { nombre?, apellido?, telefono?, direccion?, fecha_nacimiento?, dpi? }
- */
 router.put("/me", auth(), authorize("paciente"), async (req, res) => {
   try {
     const id = Number(req.user?.id || 0);
@@ -51,11 +45,6 @@ router.put("/me", auth(), authorize("paciente"), async (req, res) => {
   }
 });
 
-/**
- * PUT /api/pacientes/me/password
- * Cambia la contraseña del paciente
- * Body: { current_password, new_password }
- */
 router.put("/me/password", auth(), authorize("paciente"), async (req, res) => {
   try {
     const id = Number(req.user?.id || 0);
@@ -85,10 +74,6 @@ router.put("/me/password", auth(), authorize("paciente"), async (req, res) => {
   }
 });
 
-/**
- * DELETE /api/pacientes/me
- * Desactiva la cuenta (soft delete => activo=0)
- */
 router.delete("/me", auth(), authorize("paciente"), async (req, res) => {
   try {
     const id = Number(req.user?.id || 0);
@@ -99,6 +84,144 @@ router.delete("/me", auth(), authorize("paciente"), async (req, res) => {
   } catch (err) {
     console.error("[DELETE /pacientes/me] Error:", err);
     return res.status(500).json({ error: "No se pudo desactivar la cuenta" });
+  }
+});
+
+/**
+ * CRUD público/administrable básico
+ */
+
+// GET /api/pacientes
+router.get("/", async (_req, res) => {
+  try {
+    const rows = await Pacientes.findAll();
+    return res.json(rows);
+  } catch (err) {
+    console.error("[GET /pacientes] Error:", err);
+    return res.status(500).json({ error: "No se pudo listar pacientes" });
+  }
+});
+
+// GET /api/pacientes/:id
+router.get("/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id || 0);
+    if (!id) return res.status(400).json({ error: "ID inválido" });
+
+    const item = await Pacientes.getById(id);
+    if (!item) return res.status(404).json({ error: "Paciente no encontrado" });
+    return res.json(item);
+  } catch (err) {
+    console.error("[GET /pacientes/:id] Error:", err);
+    return res.status(500).json({ error: "No se pudo obtener el paciente" });
+  }
+});
+
+// POST /api/pacientes  (registro público)
+router.post("/", async (req, res) => {
+  try {
+    const {
+      usuario,
+      email,
+      nombre,
+      apellido,
+      telefono,
+      direccion,
+      fecha_nacimiento,
+      dpi,
+      password,
+    } = req.body || {};
+
+    if (!usuario || !email || !password) {
+      return res
+        .status(400)
+        .json({ error: "usuario, email y password son requeridos" });
+    }
+
+    const password_hash = bcrypt.hashSync(password, 10);
+
+    const created = await Pacientes.insert({
+      usuario,
+      email,
+      nombre,
+      apellido,
+      telefono,
+      direccion,
+      fecha_nacimiento,
+      dpi,
+      password_hash,
+    });
+
+    const newRow = await Pacientes.getById(created.insertId || created.id);
+    return res.status(201).json(newRow);
+  } catch (err) {
+    console.error("[POST /pacientes] Error:", err);
+    if (err?.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({ error: "Email/usuario ya registrado" });
+    }
+    return res.status(500).json({ error: "No se pudo crear el paciente" });
+  }
+});
+
+/**
+ * Rutas protegidas con política: admin-like o dueño
+ * - admin-like: roles ["admin", "direccion", "recepcion"]
+ * - dueño: rol "paciente" cuyo req.user.id === :id
+ */
+
+// PUT /api/pacientes/:id
+router.put("/:id", auth(), async (req, res) => {
+  try {
+    const id = Number(req.params.id || 0);
+    if (!id) return res.status(400).json({ error: "ID inválido" });
+
+    const adminRoles = ["admin", "direccion", "recepcion"];
+
+    // Admin-like puede actualizar cualquier registro
+    if (req.user && adminRoles.includes(req.user.rol)) {
+      await Pacientes.updateById(id, req.body);
+      const updated = await Pacientes.getById(id);
+      return res.json(updated);
+    }
+
+    // Paciente solo puede actualizar su propio registro
+    if (req.user && req.user.rol === "paciente" && Number(req.user.id) === id) {
+      await Pacientes.updateById(id, req.body);
+      const updated = await Pacientes.getById(id);
+      return res.json(updated);
+    }
+
+    return res.status(403).json({ error: "No autorizado" });
+  } catch (err) {
+    console.error("[PUT /pacientes/:id] Error:", err);
+    return res.status(500).json({ error: "No se pudo actualizar el paciente" });
+  }
+});
+
+// DELETE /api/pacientes/:id
+router.delete("/:id", auth(), async (req, res) => {
+  try {
+    const id = Number(req.params.id || 0);
+    if (!id) return res.status(400).json({ error: "ID inválido" });
+
+    const adminRoles = ["admin", "direccion", "recepcion"];
+
+    // Admin-like puede realizar hard delete (o cambia a soft delete si prefieres)
+    if (req.user && adminRoles.includes(req.user.rol)) {
+      await Pacientes.deleteById(id);
+      return res.json({ ok: true });
+    }
+
+    // Paciente puede desactivar su propia cuenta (soft delete)
+    if (req.user && req.user.rol === "paciente" && Number(req.user.id) === id) {
+      await Pacientes.deactivate(id);
+      return res.json({ ok: true });
+    }
+
+    return res.status(403).json({ error: "No autorizado" });
+  } catch (err) {
+    console.error("[DELETE /pacientes/:id] Error:", err);
+    return res.status(500).json({ error: "No se pudo eliminar el paciente" });
   }
 });
 

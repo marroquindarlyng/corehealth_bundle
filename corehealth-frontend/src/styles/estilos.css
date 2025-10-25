@@ -1,0 +1,306 @@
+/* ===== Reset básico ===== */
+:root {
+  --radius-8: 8px;
+  --btn-radius: 8px;
+  --icon-size: 1.6rem;
+  --shadow-1: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --trans-200: 0.2s ease-in-out;
+  --font: "Poppins", sans-serif;
+}
+
+/* ===== Tema Paciente (claro) ===== */
+body.theme-paciente {
+  --bg: radial-gradient(circle, #ffffff 0%, #e9ecef 100%);
+  --fg: #0d6efd;
+  --text: #0d6efd;
+  --panel-bg: #ffffff;
+  --panel-text: #0d6efd;
+
+  --btn-solid-bg: #0d6efd;
+  --btn-solid-hover: #0b5ed7;
+  --btn-solid-text: #ffffff;
+
+  --btn-outline-border: #0d6efd;
+  --btn-outline-text: #0d6efd;
+  --btn-outline-hover: rgba(13, 110, 253, 0.1);
+
+  --icon-hover-bg: rgba(13, 110, 253, 0.1);
+
+  /* Back normal: icono azul, fondo blanco */
+  --back-fg: #0d6efd;
+  --back-bg: #ffffff;
+  --back-hover-bg: rgba(13, 110, 253, 0.1);
+}
+
+/* ===== Tema Doctor (oscuro) ===== */
+body.theme-doctor {
+  --bg: radial-gradient(circle, #084298 0%, #0d6efd 100%);
+  --fg: #ffffff;
+  --text: #ffffff;
+  --panel-bg: #ffffff;
+  --panel-text: #084298;
+
+  --btn-solid-bg: #ffffff;
+  --btn-solid-hover: #e6e6e6;
+  --btn-solid-text: #0d6efd;
+
+  --btn-outline-border: #ffffff;
+  --btn-outline-text: #ffffff;
+  --btn-outline-hover: rgba(255, 255, 255, 0.1);
+
+  --icon-hover-bg: rgba(255, 255, 255, 0.12);
+
+  /* Back invertido para doctor: icono blanco, fondo azul */
+  --back-fg: #ffffff;
+  --back-bg: #0d6efd;
+  --back-hover-bg: #0b5ed7;
+}
+
+/* ===== Base de página ===== */
+body {
+  background: var(--bg);
+  font-family: var(--font);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+}
+
+/* ===== Íconos navegación ===== */
+.nav-icon,
+.home-icon,
+.help-icon {
+  position: absolute;
+  top: 16px;
+  font-size: var(--icon-size);
+  color: var(--fg);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-8);
+  transition: background-color var(--trans-200);
+}
+.home-icon {
+  left: 16px;
+}
+.help-icon {
+  right: 16px;
+}
+.nav-icon:hover,
+.home-icon:hover,
+.help-icon:hover {
+  background-color: var(--icon-hover-bg);
+}
+
+/* ===== Logo y encabezados ===== */
+.logo {
+  width: 150px;
+  margin-bottom: 1rem;
+}
+h1 {
+  font-weight: 700;
+  font-size: 2rem;
+  margin-bottom: 0.3rem;
+}
+h4 {
+  font-weight: 400;
+  opacity: 0.9;
+  margin-bottom: 2rem;
+}
+p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-bottom: 2rem;
+}
+
+/* ===== Botones ===== */
+.btn-custom {
+  min-width: 160px;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--btn-radius);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-transform: uppercase;
+  background-color: var(--btn-solid-bg);
+  color: var(--btn-solid-text);
+  border: none;
+}
+.btn-custom:hover {
+  background-color: var(--btn-solid-hover);
+}
+
+.btn-outline-custom {
+  min-width: 160px;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--btn-radius);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-transform: uppercase;
+  background-color: transparent;
+  color: var(--btn-outline-text);
+  border: 2px solid var(--btn-outline-border);
+}
+.btn-outline-custom:hover {
+  background-color: var(--btn-outline-hover);
+}
+
+/* ===== Contenedor de botones ===== */
+.buttons-container {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ===== Tarjeta / panel ===== */
+.panel,
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+/* ===== Inputs con icono ===== */
+.form-control {
+  padding-left: 2.5rem;
+  font-size: 1rem;
+}
+.input-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #0d6efd; /* Consistencia visual */
+  font-size: 1.1rem;
+}
+.input-group,
+.position-relative {
+  position: relative;
+}
+
+/* ===== Botón Back (centrado abajo) ===== */
+.back-icon {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--icon-size);
+  color: var(--back-fg);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-8);
+  transition: background-color var(--trans-200);
+  background-color: var(--back-bg);
+  box-shadow: var(--shadow-1);
+}
+.back-icon:hover {
+  background-color: var(--back-hover-bg);
+}
+/* ===== Estilos para pasos de registro ===== */
+.step-card {
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  padding: 2rem;
+  border-radius: 16px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.step-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--panel-text);
+}
+
+.nav-arrows {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn-prev,
+.btn-next {
+  background-color: var(--btn-solid-bg);
+  color: var(--btn-solid-text);
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: background-color var(--trans-200);
+}
+
+.btn-prev:hover,
+.btn-next:hover {
+  background-color: var(--btn-solid-hover);
+}
+
+.progress-dots {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.3); /* valor por defecto */
+}
+
+body.theme-doctor .dot {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+body.theme-doctor .dot.active {
+  background-color: var(--fg);
+}
+
+body.theme-paciente .dot {
+  background-color: rgba(13, 110, 253, 0.3);
+}
+
+body.theme-paciente .dot.active {
+  background-color: var(--fg);
+}
+
+/* Fondo sólido azul claro */
+body.theme-doctor .step-card {
+  background-color: #052a6ac4;
+  color: #ffffff var(--panel-text);
+}
+body.theme-doctor .step-icon {
+  color: #ffffff var(--fg); /* o directamente color: #ffffff; */
+}

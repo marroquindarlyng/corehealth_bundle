@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "../styles/LoginPage.css"; // opcional para estilos extra
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -20,9 +22,7 @@ export default function LoginPage() {
         emailOrUsuario,
         password,
       });
-      // data: { token, rol, id }
       login(data);
-      // envia a dashboard de medico o home
       if (data.rol === "medico") nav("/medico", { replace: true });
       else nav("/", { replace: true });
     } catch (e) {
@@ -35,26 +35,79 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ padding: 16 }}>
-      <h2>Login</h2>
-      <form
-        onSubmit={onSubmit}
-        style={{ display: "grid", gap: 10, maxWidth: 380 }}
+    <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+      <div
+        className="card shadow p-4"
+        style={{ maxWidth: "400px", width: "100%" }}
       >
-        <input
-          placeholder="Email o Usuario"
-          value={emailOrUsuario}
-          onChange={(e) => setU(e.target.value)}
-        />
-        <input
-          placeholder="Contraseña"
-          type="password"
-          value={password}
-          onChange={(e) => setP(e.target.value)}
-        />
-        <button disabled={loading}>{loading ? "Entrando..." : "Entrar"}</button>
-      </form>
-      {err && <p style={{ color: "red" }}>{err}</p>}
+        <div className="text-center mb-3">
+          <i className="fa-solid fa-user-doctor fa-2x text-primary"></i>
+          <h3 className="mt-2" style={{ fontFamily: "Poppins, sans-serif" }}>
+            Iniciar Sesión
+          </h3>
+        </div>
+
+        <form onSubmit={onSubmit} noValidate>
+          {/* Email/Usuario */}
+          <div className="mb-3">
+            <label className="form-label">Email o Usuario</label>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="ejemplo@correo.com"
+              value={emailOrUsuario}
+              onChange={(e) => setU(e.target.value)}
+              required
+            />
+            {!emailOrUsuario && (
+              <small className="text-muted">Ingresa tu correo o usuario</small>
+            )}
+          </div>
+
+          {/* Contraseña */}
+          <div className="mb-3">
+            <label className="form-label">Contraseña</label>
+            <input
+              type="password"
+              className="form-control"
+              placeholder="********"
+              value={password}
+              onChange={(e) => setP(e.target.value)}
+              required
+              minLength={6}
+            />
+            {password && password.length < 6 && (
+              <small className="text-danger">
+                La contraseña debe tener al menos 6 caracteres
+              </small>
+            )}
+          </div>
+
+          {/* Botón */}
+          <div className="d-grid">
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                  ></span>
+                  Entrando...
+                </>
+              ) : (
+                "Entrar"
+              )}
+            </button>
+          </div>
+        </form>
+
+        {/* Error */}
+        {err && <div className="alert alert-danger mt-3">{err}</div>}
+      </div>
     </div>
   );
 }

@@ -1,9 +1,4 @@
-/**
- * Auth Controller
- * - POST /api/auth/register           (pacientes)
- * - POST /api/auth/register-medico    (médicos)
- * - POST /api/auth/login              (pacientes o médicos)
- */
+// corehealth-backend/controllers/authController.js
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const {
@@ -16,9 +11,7 @@ function signToken(payload) {
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "8h" });
 }
 
-/**
- * Registro de PACIENTE
- */
+// PACIENTE
 async function register(req, res) {
   try {
     const {
@@ -38,7 +31,6 @@ async function register(req, res) {
     }
 
     const password_hash = bcrypt.hashSync(password, 10);
-
     const paciente = await createPaciente({
       nombre,
       apellido,
@@ -54,7 +46,6 @@ async function register(req, res) {
     return res.status(201).json({ id: paciente.id });
   } catch (err) {
     console.error("[register paciente] Error:", err);
-    // Duplicados (email/usuario/dpi)
     if (err?.code === "ER_DUP_ENTRY") {
       return res.status(409).json({ error: "Email/usuario ya registrado" });
     }
@@ -62,9 +53,7 @@ async function register(req, res) {
   }
 }
 
-/**
- * Registro de MÉDICO
- */
+// MÉDICO
 async function registerMedico(req, res) {
   try {
     const {
@@ -89,7 +78,6 @@ async function registerMedico(req, res) {
     }
 
     const password_hash = bcrypt.hashSync(password, 10);
-
     const medico = await createMedico({
       nombre,
       email,
@@ -115,9 +103,7 @@ async function registerMedico(req, res) {
   }
 }
 
-/**
- * Login (paciente o médico)
- */
+// LOGIN admin | médico | paciente
 async function login(req, res) {
   try {
     const { emailOrUsuario, password } = req.body;
@@ -125,17 +111,24 @@ async function login(req, res) {
       return res.status(400).json({ error: "Credenciales incompletas" });
     }
 
-    // Intentar en pacientes
-    let user = await findUserByEmailOrUsuario("pacientes", emailOrUsuario);
-    let rol = "paciente";
+    // 1) Admin
+    let user = await findUserByEmailOrUsuario("admins", emailOrUsuario);
+    let rol = user ? "admin" : null;
 
-    // Si no está en pacientes, intentar en medicos
+    // 2) Médico
     if (!user) {
       user = await findUserByEmailOrUsuario("medicos", emailOrUsuario);
       rol = user ? "medico" : null;
     }
+    // 3) Paciente
+    if (!user) {
+      user = await findUserByEmailOrUsuario("pacientes", emailOrUsuario);
+      rol = user ? "paciente" : null;
+    }
 
     if (!user) return res.status(401).json({ error: "Usuario no encontrado" });
+    if (user.activo === 0)
+      return res.status(403).json({ error: "Usuario inactivo" });
 
     const ok = bcrypt.compareSync(password, user.password_hash);
     if (!ok) return res.status(401).json({ error: "Credenciales inválidas" });
